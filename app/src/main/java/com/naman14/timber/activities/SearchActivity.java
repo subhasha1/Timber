@@ -43,7 +43,6 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     private RecyclerView recyclerView;
 
     private List searchResults = Collections.emptyList();
-    ;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

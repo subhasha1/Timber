@@ -1,5 +1,8 @@
 package com.naman14.timber.models;
 
+import android.databinding.BaseObservable;
+import android.databinding.Bindable;
+
 /**
  * Created by naman on 13/06/15.
  */
@@ -14,8 +17,7 @@ public class Song {
     public final String title;
     public final int trackNumber;
 
-    public Song()
-    {
+    public Song() {
         this.id = -1;
         this.albumId = -1;
         this.artistId = -1;
@@ -26,8 +28,7 @@ public class Song {
         this.trackNumber = -1;
     }
 
-    public Song(long _id, long _albumId, long _artistId, String _title, String _artistName, String _albumName, int _duration, int _trackNumber)
-    {
+    public Song(long _id, long _albumId, long _artistId, String _title, String _artistName, String _albumName, int _duration, int _trackNumber) {
         this.id = _id;
         this.albumId = _albumId;
         this.artistId = _artistId;
@@ -37,4 +38,5 @@ public class Song {
         this.duration = _duration;
         this.trackNumber = _trackNumber;
     }
+
 }

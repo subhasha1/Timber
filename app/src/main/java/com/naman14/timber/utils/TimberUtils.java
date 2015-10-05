@@ -3,6 +3,7 @@ package com.naman14.timber.utils;
 import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
+import android.databinding.BindingAdapter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -10,8 +11,12 @@ import android.os.Build;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.util.TypedValue;
+import android.widget.ImageView;
 
 import com.naman14.timber.R;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 
 /**
  * Created by naman on 14/06/15.
@@ -61,25 +66,25 @@ public class TimberUtils {
         return state;
     }
 
-    public static boolean isMarshmallow(){
-        return Build.VERSION.SDK_INT>=Build.VERSION_CODES.M;
+    public static boolean isMarshmallow() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 
-    public static boolean isLollipop(){
-        return Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP;
+    public static boolean isLollipop() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
     }
 
 
-    public static boolean isJellyBeanMR2(){
-        return Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR2;
+    public static boolean isJellyBeanMR2() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2;
     }
 
-    public static boolean isJellyBean(){
-        return Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN;
+    public static boolean isJellyBean() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN;
     }
 
-    public static boolean isJellyBeanMR1(){
-        return Build.VERSION.SDK_INT>=Build.VERSION_CODES.JELLY_BEAN_MR1;
+    public static boolean isJellyBeanMR1() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1;
     }
 
     public static Uri getAlbumArtUri(long paramInt) {
@@ -108,6 +113,7 @@ public class TimberUtils {
             throw new IllegalArgumentException("Unrecognized id: " + id);
         }
     }
+
     public static enum PlaylistType {
         LastAdded(-1, R.string.playlist_last_added),
         RecentlyPlayed(-2, R.string.playlist_recently_played),
@@ -183,6 +189,29 @@ public class TimberUtils {
         }
 
         return 0;
+    }
+
+    @BindingAdapter({"bind:albumArt", "bind:bitmapDisplayer"})
+    public static void displayAlbumArt(ImageView view, long artId, int displayerDelay) {
+        displayAlbumArt(view, TimberUtils.getAlbumArtUri(artId).toString(), displayerDelay);
+    }
+
+    @BindingAdapter({"bind:albumArt", "bind:bitmapDisplayer"})
+    public static void displayAlbumArt(ImageView view, String url, int displayerDelay) {
+        DisplayImageOptions.Builder builder = new DisplayImageOptions.Builder()
+                .cacheOnDisk(true)
+                .cacheInMemory(true)
+                .showImageOnFail(R.drawable.ic_empty_music2)
+                .resetViewBeforeLoading(true);
+        if (displayerDelay > 0) {
+            builder.displayer(new FadeInBitmapDisplayer(displayerDelay));
+        }
+        ImageLoader.getInstance().displayImage(url, view, builder.build());
+    }
+
+    @BindingAdapter("bind:albumArt")
+    public static void displayAlbumArt(ImageView view, long artId) {
+        displayAlbumArt(view, artId, 0);
     }
 
 

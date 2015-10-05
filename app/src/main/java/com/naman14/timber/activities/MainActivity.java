@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.databinding.BindingAdapter;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,11 +23,13 @@ import android.widget.TextView;
 
 import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
+import com.naman14.timber.databinding.NavHeaderBinding;
 import com.naman14.timber.fragments.AlbumDetailFragment;
 import com.naman14.timber.fragments.ArtistDetailFragment;
 import com.naman14.timber.fragments.MainFragment;
 import com.naman14.timber.fragments.PlaylistFragment;
 import com.naman14.timber.fragments.QueueFragment;
+import com.naman14.timber.models.AlbumHeader;
 import com.naman14.timber.permissions.Nammu;
 import com.naman14.timber.permissions.PermissionCallback;
 import com.naman14.timber.slidinguppanel.SlidingUpPanelLayout;
@@ -51,9 +54,6 @@ public class MainActivity extends BaseActivity {
     SlidingUpPanelLayout panelLayout;
     NavigationView navigationView;
 
-    TextView songtitle, songartist;
-    ImageView albumart;
-
     String action;
 
     Map<String, Runnable> navigationMap = new HashMap<String, Runnable>();
@@ -63,6 +63,7 @@ public class MainActivity extends BaseActivity {
     private boolean isDarkTheme;
 
     private boolean isNavigatingMain = true;
+    private NavHeaderBinding navHeaderBinding;
 
     public static MainActivity getInstance() {
         return sMainActivity;
@@ -100,7 +101,6 @@ public class MainActivity extends BaseActivity {
             setContentView(R.layout.activity_main);
         }
 
-
         navigationMap.put(Constants.NAVIGATE_LIBRARY, navigateLibrary);
         navigationMap.put(Constants.NAVIGATE_PLAYLIST, navigatePlaylist);
         navigationMap.put(Constants.NAVIGATE_QUEUE, navigateQueue);
@@ -112,12 +112,8 @@ public class MainActivity extends BaseActivity {
         panelLayout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
-        View header = navigationView.inflateHeaderView(R.layout.nav_header);
-
-        albumart = (ImageView) header.findViewById(R.id.album_art);
-        songtitle = (TextView) header.findViewById(R.id.song_title);
-        songartist = (TextView) header.findViewById(R.id.song_artist);
-
+        navHeaderBinding = NavHeaderBinding.inflate(getLayoutInflater());
+        navigationView.addHeaderView(navHeaderBinding.getRoot());
         setPanelSlideListeners();
 
         navDrawerRunnable.postDelayed(new Runnable() {
@@ -131,7 +127,7 @@ public class MainActivity extends BaseActivity {
 
         if (TimberUtils.isMarshmallow()) {
             checkPermissionAndThenLoad();
-        } else  {
+        } else {
             loadEverything();
         }
 
@@ -168,6 +164,7 @@ public class MainActivity extends BaseActivity {
             }
         }
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -319,18 +316,13 @@ public class MainActivity extends BaseActivity {
     }
 
     public void setDetailsToHeader() {
+//        if(navHeaderView!=null) {
         String name = MusicPlayer.getTrackName();
         String artist = MusicPlayer.getArtistName();
-
-        if (name != null && artist != null) {
-            songtitle.setText(name);
-            songartist.setText(artist);
-        }
-        ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(MusicPlayer.getCurrentAlbumId()).toString(), albumart,
-                new DisplayImageOptions.Builder().cacheInMemory(true)
-                        .showImageOnFail(R.drawable.ic_empty_music2)
-                        .resetViewBeforeLoading(true)
-                        .build());
+        long albumArt = MusicPlayer.getCurrentAlbumId();
+        AlbumHeader albumHeader = new AlbumHeader(name, artist, albumArt);
+        navHeaderBinding.setAlbum(albumHeader);
+//        }
     }
 
     @Override
@@ -475,7 +467,7 @@ public class MainActivity extends BaseActivity {
     final PermissionCallback permissionReadstorageCallback = new PermissionCallback() {
         @Override
         public void permissionGranted() {
-          loadEverything();
+            loadEverything();
         }
 
         @Override
