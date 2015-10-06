@@ -14,6 +14,7 @@
 
 package com.naman14.timber.subfragments;
 
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -26,11 +27,14 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
 import com.naman14.timber.activities.BaseActivity;
+import com.naman14.timber.databinding.BottomNowplayingCardBinding;
+import com.naman14.timber.databinding.FragmentPlaybackControlsBinding;
 import com.naman14.timber.listeners.MusicStateListener;
 import com.naman14.timber.nowplaying.BaseNowplayingFragment;
 import com.naman14.timber.utils.ImageUtils;
@@ -44,16 +48,10 @@ import com.nostra13.universalimageloader.core.listener.ImageLoadingListener;
 public class QuickControlsFragment extends BaseNowplayingFragment implements MusicStateListener {
 
 
-    private PlayPauseButton mPlayPause;
-    private TextView mTitle;
-    private TextView mArtist;
-    private TextView mExtraInfo;
-    private ImageView mAlbumArt, mBlurredArt;
     private String mArtUrl;
-    private static ProgressBar mProgress;
-    public static View topContainer;
-    private View rootView;
-    private View playPauseWrapper;
+    public static RelativeLayout topContainer;
+    private FragmentPlaybackControlsBinding binding;
+    private BottomNowplayingCardBinding nowplayingCardBinding;
 
     private boolean duetoplaypause = false;
 
@@ -61,20 +59,10 @@ public class QuickControlsFragment extends BaseNowplayingFragment implements Mus
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_playback_controls, container, false);
-        this.rootView = rootView;
-
-        mPlayPause = (PlayPauseButton) rootView.findViewById(R.id.play_pause);
-        playPauseWrapper = rootView.findViewById(R.id.play_pause_wrapper);
-        mPlayPause.setEnabled(true);
-        playPauseWrapper.setOnClickListener(mButtonListener);
-        mProgress = (ProgressBar) rootView.findViewById(R.id.song_progress_normal);
-        mTitle = (TextView) rootView.findViewById(R.id.title);
-        mArtist = (TextView) rootView.findViewById(R.id.artist);
-        mAlbumArt = (ImageView) rootView.findViewById(R.id.album_art_nowplayingcard);
-        mBlurredArt = (ImageView) rootView.findViewById(R.id.blurredAlbumart);
-        topContainer = rootView.findViewById(R.id.topContainer);
-
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playback_controls, container, false);
+        nowplayingCardBinding = DataBindingUtil.bind(binding.getRoot().findViewById(R.id.bottom_nowplaying));
+        topContainer = nowplayingCardBinding.topContainer;
+        ProgressBar mProgress = nowplayingCardBinding.songProgressNormal;
         LinearLayout.LayoutParams layoutParams = (LinearLayout.LayoutParams) mProgress.getLayoutParams();
         mProgress.measure(0, 0);
         layoutParams.setMargins(0, -(mProgress.getMeasuredHeight() / 2), 0, 0);
@@ -82,12 +70,13 @@ public class QuickControlsFragment extends BaseNowplayingFragment implements Mus
         mProgress.setScaleY(0.5f);
 
         if (isThemeIsLight()) {
-            mPlayPause.setColor(getActivity().getResources().getColor(R.color.colorAccent));
+            nowplayingCardBinding.playPause.setColor(getActivity().getResources().getColor(R.color.colorAccent));
         } else if (isThemeIsDark()) {
-            mPlayPause.setColor(getActivity().getResources().getColor(R.color.colorAccentDarkTheme));
-        } else mPlayPause.setColor(getActivity().getResources().getColor(R.color.colorAccentBlack));
+            nowplayingCardBinding.playPause.setColor(getActivity().getResources().getColor(R.color.colorAccentDarkTheme));
+        } else
+            nowplayingCardBinding.playPause.setColor(getActivity().getResources().getColor(R.color.colorAccentBlack));
 
-        rootView.setOnClickListener(new View.OnClickListener() {
+        binding.getRoot().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
@@ -97,21 +86,21 @@ public class QuickControlsFragment extends BaseNowplayingFragment implements Mus
         ((BaseActivity) getActivity()).setMusicStateListenerListener(this);
 
 
-        return rootView;
+        return binding.getRoot();
     }
 
     public void updateControlsFragment() {
         //let basenowplayingfragment take care of this
-        setSongDetails(rootView);
+        setSongDetails(binding.getRoot());
 
     }
 
     //to update the permanent now playing card at the bottom
     public void updateNowplayingCard() {
-        mTitle.setText(MusicPlayer.getTrackName());
-        mArtist.setText(MusicPlayer.getArtistName());
+        binding.songTitle.setText(MusicPlayer.getTrackName());
+        binding.songArtist.setText(MusicPlayer.getArtistName());
         if (!duetoplaypause) {
-            ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(MusicPlayer.getCurrentAlbumId()).toString(), mAlbumArt,
+            ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(MusicPlayer.getCurrentAlbumId()).toString(), nowplayingCardBinding.albumArtNowplayingcard,
                     new DisplayImageOptions.Builder().cacheInMemory(true)
                             .showImageOnFail(R.drawable.ic_empty_music2)
                             .resetViewBeforeLoading(true)
@@ -160,8 +149,7 @@ public class QuickControlsFragment extends BaseNowplayingFragment implements Mus
     @Override
     public void onResume() {
         super.onResume();
-        topContainer = rootView.findViewById(R.id.topContainer);
-
+        topContainer = nowplayingCardBinding.topContainer;
     }
 
 
@@ -169,13 +157,12 @@ public class QuickControlsFragment extends BaseNowplayingFragment implements Mus
         @Override
         public void onClick(View v) {
             duetoplaypause = true;
-            ;
-            if (!mPlayPause.isPlayed()) {
-                mPlayPause.setPlayed(true);
-                mPlayPause.startAnimation();
+            if (!nowplayingCardBinding.playPause.isPlayed()) {
+                nowplayingCardBinding.playPause.setPlayed(true);
+                nowplayingCardBinding.playPause.startAnimation();
             } else {
-                mPlayPause.setPlayed(false);
-                mPlayPause.startAnimation();
+                nowplayingCardBinding.playPause.setPlayed(false);
+                nowplayingCardBinding.playPause.startAnimation();
             }
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -190,14 +177,14 @@ public class QuickControlsFragment extends BaseNowplayingFragment implements Mus
 
     public void updateState() {
         if (MusicPlayer.isPlaying()) {
-            if (!mPlayPause.isPlayed()) {
-                mPlayPause.setPlayed(true);
-                mPlayPause.startAnimation();
+            if (!nowplayingCardBinding.playPause.isPlayed()) {
+                nowplayingCardBinding.playPause.setPlayed(true);
+                nowplayingCardBinding.playPause.startAnimation();
             }
         } else {
-            if (mPlayPause.isPlayed()) {
-                mPlayPause.setPlayed(false);
-                mPlayPause.startAnimation();
+            if (nowplayingCardBinding.playPause.isPlayed()) {
+                nowplayingCardBinding.playPause.setPlayed(false);
+                nowplayingCardBinding.playPause.startAnimation();
             }
         }
     }
@@ -234,17 +221,17 @@ public class QuickControlsFragment extends BaseNowplayingFragment implements Mus
         @Override
         protected void onPostExecute(Drawable result) {
             if (result != null) {
-                if (mBlurredArt.getDrawable() != null) {
+                if (binding.blurredAlbumart.getDrawable() != null) {
                     final TransitionDrawable td =
                             new TransitionDrawable(new Drawable[]{
-                                    mBlurredArt.getDrawable(),
+                                    binding.blurredAlbumart.getDrawable(),
                                     result
                             });
-                    mBlurredArt.setImageDrawable(td);
+                    binding.blurredAlbumart.setImageDrawable(td);
                     td.startTransition(400);
 
                 } else {
-                    mBlurredArt.setImageDrawable(result);
+                    binding.blurredAlbumart.setImageDrawable(result);
                 }
             }
         }

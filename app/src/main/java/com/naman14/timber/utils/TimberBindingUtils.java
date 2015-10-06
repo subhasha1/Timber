@@ -38,6 +38,11 @@ public class TimberBindingUtils {
         displayAlbumArt(view, artId, 0);
     }
 
+    @BindingAdapter("bind:albumArt")
+    public static void displayAlbumArt(ImageView view, String url) {
+        displayAlbumArt(view, url, 0);
+    }
+
     @BindingAdapter("bind:itemDecoration")
     public static void setItemDecoration(RecyclerView view, RecyclerView.ItemDecoration decoration) {
         if (decoration != null)

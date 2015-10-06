@@ -14,6 +14,7 @@
 
 package com.naman14.timber.fragments;
 
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.design.widget.AppBarLayout;
@@ -33,6 +34,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.naman14.timber.R;
+import com.naman14.timber.databinding.FragmentArtistDetailBinding;
 import com.naman14.timber.dataloaders.ArtistLoader;
 import com.naman14.timber.lastfmapi.LastFmClient;
 import com.naman14.timber.lastfmapi.callbacks.ArtistInfoListener;
@@ -47,17 +49,11 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 import java.util.ArrayList;
 import java.util.List;
 
-public class ArtistDetailFragment extends Fragment  {
+public class ArtistDetailFragment extends Fragment {
 
     long artistID = -1;
 
-    ImageView artistArt;
-
-    Toolbar toolbar;
-    TabLayout tabLayout;
-    CollapsingToolbarLayout collapsingToolbarLayout;
-    AppBarLayout appBarLayout;
-    FloatingActionButton fab;
+    FragmentArtistDetailBinding binding;
 
     public static ArtistDetailFragment newInstance(long id) {
         ArtistDetailFragment fragment = new ArtistDetailFragment();
@@ -76,27 +72,16 @@ public class ArtistDetailFragment extends Fragment  {
     }
 
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(
-                R.layout.fragment_artist_detail, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_artist_detail, container, false);
 
-        artistArt=(ImageView) rootView.findViewById(R.id.artist_art);
-
-        collapsingToolbarLayout=(CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
-        appBarLayout=(AppBarLayout) rootView.findViewById(R.id.app_bar);
-
-
-
-        toolbar=(Toolbar) rootView.findViewById(R.id.toolbar);
         setupToolbar();
         setUpArtistDetails();
 
-        ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.viewpager);
-        if (viewPager != null) {
-            setupViewPager(viewPager);
-            viewPager.setOffscreenPageLimit(0);
+        if (binding.viewpager != null) {
+            setupViewPager(binding.viewpager);
+            binding.viewpager.setOffscreenPageLimit(0);
         }
 
 //        tabLayout = (TabLayout) rootView.findViewById(R.id.tabs);
@@ -104,42 +89,29 @@ public class ArtistDetailFragment extends Fragment  {
 //        tabLayout.setTabTextColors(Color.parseColor("#ffffff"),getActivity().getResources().getColor(R.color.colorAccent));
 //        tabLayout.setupWithViewPager(viewPager);
 
-
-        return rootView;
+        return binding.getRoot();
     }
 
-    private void setupToolbar(){
+    private void setupToolbar() {
 
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
 
-        final ActionBar ab = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
         ab.setDisplayShowTitleEnabled(false);
         ab.setDisplayHomeAsUpEnabled(true);
     }
 
-    private void setUpArtistDetails(){
+    private void setUpArtistDetails() {
 
-        Artist artist= ArtistLoader.getArtist(getActivity(),artistID);
+        Artist artist = ArtistLoader.getArtist(getActivity(), artistID);
 
-        collapsingToolbarLayout.setTitle(artist.name);
+        binding.collapsingToolbar.setTitle(artist.name);
 
-        LastFmClient.getInstance(getActivity()).getArtistInfo(new ArtistQuery(artist.name),new ArtistInfoListener() {
+        LastFmClient.getInstance(getActivity()).getArtistInfo(new ArtistQuery(artist.name), new ArtistInfoListener() {
             @Override
             public void artistInfoSucess(LastfmArtist artist) {
-                ImageLoader.getInstance().displayImage(artist.mArtwork.get(4).mUrl,artistArt,
-                        new DisplayImageOptions.Builder().cacheInMemory(true)
-                                .cacheOnDisk(true)
-                                .showImageOnFail(R.drawable.ic_empty_music2)
-                                .resetViewBeforeLoading(true)
-                                .build(),new SimpleImageLoadingListener(){
-                            @Override
-                            public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-//                                if (getActivity()!=null) {
-//                                    Drawable d = new BitmapDrawable(getActivity().getResources(), loadedImage);
-//                                    appBarLayout.setBackground(d);
-//                                }
-                            }
-                        });
+                if (artist != null && artist.mArtwork != null && artist.mArtwork.size() >= 4)
+                    binding.setArtistImage(artist.mArtwork.get(4).mUrl);
             }
 
             @Override
@@ -186,9 +158,6 @@ public class ArtistDetailFragment extends Fragment  {
             return mFragmentTitles.get(position);
         }
     }
-
-
-
 
 
 }

@@ -16,6 +16,7 @@ package com.naman14.timber.subfragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -27,6 +28,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.naman14.timber.R;
+import com.naman14.timber.databinding.FragmentStyleSelectorPagerBinding;
 import com.naman14.timber.utils.Constants;
 
 public class SubStyleSelectorFragment extends Fragment {
@@ -34,18 +36,19 @@ public class SubStyleSelectorFragment extends Fragment {
     SharedPreferences.Editor editor;
     SharedPreferences preferences;
 
-    LinearLayout currentStyle;
-    View foreground;
-    ImageView styleImage;
+    //    LinearLayout currentStyle;
+//    View foreground;
+//    ImageView styleImage;
+    FragmentStyleSelectorPagerBinding binding;
 
     private static final String ARG_PAGE_NUMBER = "pageNumber";
     private static final String WHAT = "what";
 
-    public static SubStyleSelectorFragment newInstance(int pageNumber,String what) {
+    public static SubStyleSelectorFragment newInstance(int pageNumber, String what) {
         SubStyleSelectorFragment fragment = new SubStyleSelectorFragment();
         Bundle bundle = new Bundle();
         bundle.putInt(ARG_PAGE_NUMBER, pageNumber);
-        bundle.putString(WHAT,what);
+        bundle.putString(WHAT, what);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -53,54 +56,49 @@ public class SubStyleSelectorFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_style_selector_pager, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_style_selector_pager, container, false);
 
-        TextView styleName=(TextView) rootView.findViewById(R.id.style_name);
-        styleName.setText(String.valueOf(getArguments().getInt(ARG_PAGE_NUMBER)+1));
+        binding.styleName.setText(String.valueOf(getArguments().getInt(ARG_PAGE_NUMBER) + 1));
 
-        styleImage=(ImageView) rootView.findViewById(R.id.style_image);
-        styleImage.setOnClickListener(new View.OnClickListener() {
+        binding.styleImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 setPreferences();
             }
         });
-
+        int imageResource = 0;
         switch (getArguments().getInt(ARG_PAGE_NUMBER)) {
             case 0:
-                styleImage.setImageResource(R.drawable.timber_1_nowplaying_x);
+                imageResource = R.drawable.timber_1_nowplaying_x;
                 break;
             case 1:
-                styleImage.setImageResource(R.drawable.timber_2_nowplaying_x);
+                imageResource = R.drawable.timber_2_nowplaying_x;
                 break;
             case 2:
-                styleImage.setImageResource(R.drawable.timber_3_nowplaying_x);
+                imageResource = R.drawable.timber_3_nowplaying_x;
                 break;
             case 3:
-                styleImage.setImageResource(R.drawable.timber_4_nowplaying_x);
+                imageResource = R.drawable.timber_4_nowplaying_x;
                 break;
         }
+        binding.styleImage.setImageResource(imageResource);
 
-        currentStyle = (LinearLayout) rootView.findViewById(R.id.currentStyle);
-        foreground = rootView.findViewById(R.id.foreground);
-
-       setCurrentStyle();
-
-        return rootView;
+        setCurrentStyle();
+        return binding.getRoot();
     }
 
     public void setCurrentStyle() {
         preferences = getActivity().getSharedPreferences(Constants.FRAGMENT_ID, Context.MODE_PRIVATE);
-        String fragmentID= preferences.getString(Constants.NOWPLAYING_FRAGMENT_ID, Constants.TIMBER3);
+        String fragmentID = preferences.getString(Constants.NOWPLAYING_FRAGMENT_ID, Constants.TIMBER3);
 
-        ((StyleSelectorFragment)getParentFragment()).scrollToCurrentStyle(getIntForCurrentNowplaying(fragmentID));
+        ((StyleSelectorFragment) getParentFragment()).scrollToCurrentStyle(getIntForCurrentNowplaying(fragmentID));
 
-        if (getArguments().getInt(ARG_PAGE_NUMBER)==getIntForCurrentNowplaying(fragmentID)) {
-            currentStyle.setVisibility(View.VISIBLE);
-            foreground.setVisibility(View.VISIBLE);
+        if (getArguments().getInt(ARG_PAGE_NUMBER) == getIntForCurrentNowplaying(fragmentID)) {
+            binding.currentStyle.setVisibility(View.VISIBLE);
+            binding.foreground.setVisibility(View.VISIBLE);
         } else {
-            currentStyle.setVisibility(View.GONE);
-            foreground.setVisibility(View.GONE);
+            binding.currentStyle.setVisibility(View.GONE);
+            binding.foreground.setVisibility(View.GONE);
         }
 
     }
@@ -112,17 +110,22 @@ public class SubStyleSelectorFragment extends Fragment {
             editor.putString(Constants.NOWPLAYING_FRAGMENT_ID, getStyleForPageNumber());
             editor.commit();
             setCurrentStyle();
-            ((StyleSelectorFragment)getParentFragment()).updateCurrentStyle();
+            ((StyleSelectorFragment) getParentFragment()).updateCurrentStyle();
         }
     }
 
-    private String getStyleForPageNumber(){
-        switch (getArguments().getInt(ARG_PAGE_NUMBER)){
-            case 0: return Constants.TIMBER1;
-            case 1: return Constants.TIMBER2;
-            case 2: return Constants.TIMBER3;
-            case 3: return Constants.TIMBER4;
-            default:return Constants.TIMBER3;
+    private String getStyleForPageNumber() {
+        switch (getArguments().getInt(ARG_PAGE_NUMBER)) {
+            case 0:
+                return Constants.TIMBER1;
+            case 1:
+                return Constants.TIMBER2;
+            case 2:
+                return Constants.TIMBER3;
+            case 3:
+                return Constants.TIMBER4;
+            default:
+                return Constants.TIMBER3;
         }
     }
 

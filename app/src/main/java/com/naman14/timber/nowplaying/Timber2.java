@@ -14,6 +14,7 @@
 
 package com.naman14.timber.nowplaying;
 
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -28,24 +29,25 @@ import android.widget.ImageView;
 
 import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
+import com.naman14.timber.databinding.FragmentTimber2Binding;
 import com.naman14.timber.utils.ImageUtils;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 
 public class Timber2 extends BaseNowplayingFragment {
 
-    ImageView mBlurredArt;
+    FragmentTimber2Binding binding;
+    private ImageView mBlurredArt;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(
-                R.layout.fragment_timber2, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_timber2, container, false);
 
         setMusicStateListener();
-        setSongDetails(rootView);
-        mBlurredArt = (ImageView) rootView.findViewById(R.id.album_art_blurred);
+        setSongDetails(binding.getRoot());
+        mBlurredArt = binding.albumArtBlurred;
 
-        return rootView;
+        return binding.getRoot();
     }
 
     @Override

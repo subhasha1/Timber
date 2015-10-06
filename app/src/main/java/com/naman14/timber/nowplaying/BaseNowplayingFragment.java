@@ -15,6 +15,7 @@
 package com.naman14.timber.nowplaying;
 
 import android.animation.ObjectAnimator;
+import android.databinding.ViewDataBinding;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -82,6 +83,11 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
 
     private boolean duetoplaypause = false;
 
+
+    public void setSongDetails(ViewDataBinding binding) {
+    }
+
+
     public void setSongDetails(View view) {
 
         albumart = (ImageView) view.findViewById(R.id.album_art);
@@ -130,7 +136,7 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
             else playPauseDrawable.transformToPlay(false);
         }
 
-        if (timelyView11!=null) {
+        if (timelyView11 != null) {
             String time = TimberUtils.makeShortTimeString(getActivity(), MusicPlayer.position() / 1000);
             if (time.length() > 4) {
                 changeDigit(timelyView11, time.charAt(0) - '0');
@@ -155,9 +161,10 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
         if (mProgress != null && getActivity() != null) {
             if (isThemeIsLight()) {
                 mProgress.getThumb().setColorFilter(getActivity().getResources().getColor(R.color.colorAccent), PorterDuff.Mode.SRC_IN);
-            } else if (isThemeIsDark()){
+            } else if (isThemeIsDark()) {
                 mProgress.getThumb().setColorFilter(getActivity().getResources().getColor(R.color.colorAccentDarkTheme), PorterDuff.Mode.SRC_IN);
-            } else  mProgress.getThumb().setColorFilter(getActivity().getResources().getColor(R.color.colorAccentBlack), PorterDuff.Mode.SRC_IN);
+            } else
+                mProgress.getThumb().setColorFilter(getActivity().getResources().getColor(R.color.colorAccentBlack), PorterDuff.Mode.SRC_IN);
         }
         if (recyclerView != null)
             setQueueSongs();
@@ -224,9 +231,9 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
 
             int color2;
             if (isThemeIsBlack())
-                color2=Color.parseColor("#ffb701");
+                color2 = Color.parseColor("#ffb701");
             else
-            color2 = typeValue.data;
+                color2 = typeValue.data;
 
             if (MusicPlayer.getShuffleMode() == 0) {
                 builder.setColor(color);
@@ -257,7 +264,7 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
             getActivity().getTheme().resolveAttribute(R.attr.accentColor, typeValue, true);
             int color2;
             if (isThemeIsBlack())
-                color2=Color.parseColor("#ffb701");
+                color2 = Color.parseColor("#ffb701");
             else
                 color2 = typeValue.data;
 
@@ -358,8 +365,8 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
         if (songartist != null)
             songartist.setText(MusicPlayer.getArtistName());
 
-        if (songduration != null && getActivity()!=null)
-            songduration.setText(TimberUtils.makeShortTimeString(getActivity(),MusicPlayer.duration() / 1000));
+        if (songduration != null && getActivity() != null)
+            songduration.setText(TimberUtils.makeShortTimeString(getActivity(), MusicPlayer.duration() / 1000));
 
         if (mProgress != null) {
             mProgress.setMax((int) MusicPlayer.duration());
@@ -392,8 +399,8 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
     public void setQueueSongs() {
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         //load queue songs in asynctask
-        if (getActivity()!=null)
-        new loadQueueSongs().execute("");
+        if (getActivity() != null)
+            new loadQueueSongs().execute("");
 
     }
 
@@ -473,7 +480,7 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
             if (mProgress != null) {
                 long position = MusicPlayer.position();
                 mProgress.setProgress((int) position);
-                if (elapsedtime != null && getActivity()!=null)
+                if (elapsedtime != null && getActivity() != null)
                     elapsedtime.setText(TimberUtils.makeShortTimeString(getActivity(), position / 1000));
             }
 
@@ -492,7 +499,7 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
             if (mCircularProgress != null) {
                 long position = MusicPlayer.position();
                 mCircularProgress.setProgress((int) position);
-                if (elapsedtime != null && getActivity()!=null)
+                if (elapsedtime != null && getActivity() != null)
                     elapsedtime.setText(TimberUtils.makeShortTimeString(getActivity(), position / 1000));
 
             }
@@ -524,7 +531,7 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
     public Runnable mUpdateElapsedTime = new Runnable() {
         @Override
         public void run() {
-            if (getActivity()!=null) {
+            if (getActivity() != null) {
                 String time = TimberUtils.makeShortTimeString(getActivity(), MusicPlayer.position() / 1000);
                 if (time.length() > 4) {
                     tv11(time.charAt(0) - '0');
@@ -560,7 +567,7 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
             recyclerView.setAdapter(mAdapter);
             if (getActivity() != null)
                 recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-            recyclerView.scrollToPosition(MusicPlayer.getQueuePosition()-1);
+            recyclerView.scrollToPosition(MusicPlayer.getQueuePosition() - 1);
 
         }
 
@@ -599,11 +606,13 @@ public class BaseNowplayingFragment extends Fragment implements MusicStateListen
             return PreferencesUtility.getInstance(getActivity()).getTheme().equals("light");
         else return true;
     }
+
     public boolean isThemeIsDark() {
         if (getActivity() != null)
             return PreferencesUtility.getInstance(getActivity()).getTheme().equals("dark");
         else return true;
     }
+
     public boolean isThemeIsBlack() {
         if (getActivity() != null)
             return PreferencesUtility.getInstance(getActivity()).getTheme().equals("black");

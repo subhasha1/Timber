@@ -14,6 +14,7 @@
 
 package com.naman14.timber.fragments;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -22,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.naman14.timber.R;
+import com.naman14.timber.databinding.FragmentArtistBioBinding;
 import com.naman14.timber.dataloaders.ArtistLoader;
 import com.naman14.timber.lastfmapi.LastFmClient;
 import com.naman14.timber.lastfmapi.callbacks.ArtistInfoListener;
@@ -34,7 +36,7 @@ import com.naman14.timber.widgets.MultiViewPager;
 
 public class ArtistBioFragment extends Fragment {
 
-    long artistID=-1;
+    long artistID = -1;
 
     public static ArtistBioFragment newInstance(long id) {
         ArtistBioFragment fragment = new ArtistBioFragment();
@@ -51,25 +53,23 @@ public class ArtistBioFragment extends Fragment {
             artistID = getArguments().getLong(Constants.ARTIST_ID);
         }
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(
-                R.layout.fragment_artist_bio, container, false);
+        FragmentArtistBioBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_artist_bio, container, false);
 
-        Artist artist= ArtistLoader.getArtist(getActivity(), artistID);
-
-        LastFmClient.getInstance(getActivity()).getArtistInfo(new ArtistQuery(artist.name),new ArtistInfoListener() {
-            @Override
-            public void artistInfoSucess(LastfmArtist artist) {
-
-            }
-
-            @Override
-            public void artistInfoFailed() {
-            }
-        });
-
-        final MultiViewPager pager = (MultiViewPager) rootView.findViewById(R.id.tagspager);
+//Not used now
+//        Artist artist = ArtistLoader.getArtist(getActivity(), artistID);
+//        LastFmClient.getInstance(getActivity()).getArtistInfo(new ArtistQuery(artist.name), new ArtistInfoListener() {
+//            @Override
+//            public void artistInfoSucess(LastfmArtist artist) {
+//
+//            }
+//
+//            @Override
+//            public void artistInfoFailed() {
+//            }
+//        });
 
         final FragmentStatePagerAdapter adapter = new FragmentStatePagerAdapter(getActivity().getSupportFragmentManager()) {
 
@@ -84,10 +84,8 @@ public class ArtistBioFragment extends Fragment {
             }
 
         };
-        pager.setAdapter(adapter);
-
-        return rootView;
-
+        binding.tagspager.setAdapter(adapter);
+        return binding.getRoot();
     }
 
 }

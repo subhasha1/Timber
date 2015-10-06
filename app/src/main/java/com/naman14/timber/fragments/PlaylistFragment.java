@@ -14,6 +14,7 @@
 
 package com.naman14.timber.fragments;
 
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -25,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.naman14.timber.R;
+import com.naman14.timber.databinding.FragmentPlaylistBinding;
 import com.naman14.timber.dataloaders.PlaylistLoader;
 import com.naman14.timber.models.Playlist;
 import com.naman14.timber.subfragments.PlaylistPagerFragment;
@@ -38,21 +40,17 @@ public class PlaylistFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(
-                R.layout.fragment_playlist, container, false);
+        FragmentPlaylistBinding binding = DataBindingUtil.inflate(inflater, R.layout.fragment_playlist, container, false);
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
 
-        final ActionBar ab = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
         ab.setHomeAsUpIndicator(R.drawable.ic_menu);
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setTitle("Playlists");
 
-        final List<Playlist> playlists= PlaylistLoader.getPlaylists(getActivity());
-        playlistcount=playlists.size();
-
-        final MultiViewPager pager = (MultiViewPager) rootView.findViewById(R.id.playlistpager);
+        final List<Playlist> playlists = PlaylistLoader.getPlaylists(getActivity());
+        playlistcount = playlists.size();
 
         final FragmentStatePagerAdapter adapter = new FragmentStatePagerAdapter(getChildFragmentManager()) {
 
@@ -67,10 +65,11 @@ public class PlaylistFragment extends Fragment {
             }
 
         };
-        pager.setAdapter(adapter);
-        pager.setOffscreenPageLimit(3);
 
-        return rootView;
+        binding.playlistpager.setAdapter(adapter);
+        binding.playlistpager.setOffscreenPageLimit(3);
+
+        return binding.getRoot();
 
     }
 

@@ -14,6 +14,7 @@
 
 package com.naman14.timber.fragments;
 
+import android.databinding.DataBindingUtil;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -31,6 +32,7 @@ import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
 import com.naman14.timber.activities.BaseActivity;
 import com.naman14.timber.adapters.PlayingQueueAdapter;
+import com.naman14.timber.databinding.FragmentQueueBinding;
 import com.naman14.timber.dataloaders.QueueLoader;
 import com.naman14.timber.listeners.MusicStateListener;
 import com.naman14.timber.models.Song;
@@ -39,41 +41,38 @@ import com.naman14.timber.widgets.DragSortRecycler;
 public class QueueFragment extends Fragment implements MusicStateListener {
 
     private PlayingQueueAdapter mAdapter;
-    private RecyclerView recyclerView;
+    FragmentQueueBinding binding;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView =  inflater.inflate(
-                R.layout.fragment_queue, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_queue, container, false);
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
 
-        final ActionBar ab = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
         ab.setHomeAsUpIndicator(R.drawable.ic_menu);
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setTitle("Playing Queue");
 
-        recyclerView=(RecyclerView) rootView.findViewById(R.id.recyclerview);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        recyclerView.setItemAnimator(null);
+        binding.recyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
+        binding.recyclerview.setItemAnimator(null);
 
         new loadQueueSongs().execute("");
-        ((BaseActivity)getActivity()).setMusicStateListenerListener(this);
+        ((BaseActivity) getActivity()).setMusicStateListenerListener(this);
 
-        return rootView;
+        return binding.getRoot();
     }
 
-    public void restartLoader(){
-
-    }
-
-    public void onPlaylistChanged(){
+    public void restartLoader() {
 
     }
 
-    public void onMetaChanged(){
-        if (mAdapter!=null)
+    public void onPlaylistChanged() {
+
+    }
+
+    public void onMetaChanged() {
+        if (mAdapter != null)
             mAdapter.notifyDataSetChanged();
     }
 
@@ -87,7 +86,7 @@ public class QueueFragment extends Fragment implements MusicStateListener {
 
         @Override
         protected void onPostExecute(String result) {
-            recyclerView.setAdapter(mAdapter);
+            binding.recyclerview.setAdapter(mAdapter);
             DragSortRecycler dragSortRecycler = new DragSortRecycler();
             dragSortRecycler.setViewHandleId(R.id.albumArt);
 
@@ -95,24 +94,23 @@ public class QueueFragment extends Fragment implements MusicStateListener {
                 @Override
                 public void onItemMoved(int from, int to) {
                     Log.d("queue", "onItemMoved " + from + " to " + to);
-                    Song song= mAdapter.getSongAt(from);
+                    Song song = mAdapter.getSongAt(from);
                     mAdapter.removeSongAt(from);
-                    mAdapter.addSongTo(to,song);
+                    mAdapter.addSongTo(to, song);
                     mAdapter.notifyDataSetChanged();
                     MusicPlayer.moveQueueItem(from, to);
                 }
             });
 
-            recyclerView.addItemDecoration(dragSortRecycler);
-            recyclerView.addOnItemTouchListener(dragSortRecycler);
-            recyclerView.setOnScrollListener(dragSortRecycler.getScrollListener());
-
-            recyclerView.getLayoutManager().scrollToPosition(mAdapter.currentlyPlayingPosition);
-
+            binding.recyclerview.addItemDecoration(dragSortRecycler);
+            binding.recyclerview.addOnItemTouchListener(dragSortRecycler);
+            binding.recyclerview.setOnScrollListener(dragSortRecycler.getScrollListener());
+            binding.recyclerview.getLayoutManager().scrollToPosition(mAdapter.currentlyPlayingPosition);
         }
 
         @Override
-        protected void onPreExecute() {}
+        protected void onPreExecute() {
+        }
     }
 
 }
