@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.naman14.timber.R;
+import com.naman14.timber.databinding.FragmentMainBinding;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,28 +26,20 @@ public class MainFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(
-                R.layout.fragment_main, container, false);
+        FragmentMainBinding binding = FragmentMainBinding.inflate(inflater, container, false);
+        ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
 
-        Toolbar toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-
-        final ActionBar ab = ((AppCompatActivity)getActivity()).getSupportActionBar();
+        final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
         ab.setHomeAsUpIndicator(R.drawable.ic_menu);
         ab.setDisplayHomeAsUpEnabled(true);
 
 
-        ViewPager viewPager = (ViewPager) rootView.findViewById(R.id.viewpager);
-        if (viewPager != null) {
-            setupViewPager(viewPager);
-            viewPager.setOffscreenPageLimit(2);
+        if (binding.viewpager != null) {
+            setupViewPager(binding.viewpager);
+            binding.viewpager.setOffscreenPageLimit(2);
         }
-
-        TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
-
-        return rootView;
-
+        binding.tabs.setupWithViewPager(binding.viewpager);
+        return binding.getRoot();
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -57,7 +50,7 @@ public class MainFragment extends Fragment {
         viewPager.setAdapter(adapter);
     }
 
-    static class Adapter extends FragmentPagerAdapter {
+    public static class Adapter extends FragmentPagerAdapter {
         private final List<Fragment> mFragments = new ArrayList<>();
         private final List<String> mFragmentTitles = new ArrayList<>();
 

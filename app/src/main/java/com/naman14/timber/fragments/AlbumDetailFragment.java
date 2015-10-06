@@ -2,6 +2,7 @@ package com.naman14.timber.fragments;
 
 import android.annotation.TargetApi;
 import android.content.res.ColorStateList;
+import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Build;
@@ -31,6 +32,7 @@ import android.widget.TextView;
 import com.naman14.timber.MusicPlayer;
 import com.naman14.timber.R;
 import com.naman14.timber.adapters.AlbumSongsAdapter;
+import com.naman14.timber.databinding.FragmentAlbumDetailBinding;
 import com.naman14.timber.dataloaders.AlbumLoader;
 import com.naman14.timber.dataloaders.AlbumSongLoader;
 import com.naman14.timber.listeners.SimplelTransitionListener;
@@ -58,23 +60,12 @@ public class AlbumDetailFragment extends Fragment {
 
     long albumID = -1;
 
-    ImageView albumArt, artistArt;
-    TextView albumTitle, albumDetails;
-
-    RecyclerView recyclerView;
-    AlbumSongsAdapter mAdapter;
-
-    Toolbar toolbar;
-    CoordinatorLayout coordinatorLayout;
-
     Album album;
+    FragmentAlbumDetailBinding binding;
 
-    CollapsingToolbarLayout collapsingToolbarLayout;
-    AppBarLayout appBarLayout;
-    FloatingActionButton fab;
-
-    private boolean loadFailed=false;
+    private boolean loadFailed = false;
     private boolean isDarkTheme;
+    private AlbumSongsAdapter mAdapter;
 
     public static AlbumDetailFragment newInstance(long id) {
         AlbumDetailFragment fragment = new AlbumDetailFragment();
@@ -90,29 +81,16 @@ public class AlbumDetailFragment extends Fragment {
         if (getArguments() != null) {
             albumID = getArguments().getLong(Constants.ALBUM_ID);
         }
-        isDarkTheme=PreferencesUtility.getInstance(getActivity()).getTheme().equals("black");
+        isDarkTheme = PreferencesUtility.getInstance(getActivity()).getTheme().equals("black");
     }
 
     @TargetApi(21)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(
-                R.layout.fragment_album_detail, container, false);
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_album_detail, container, false);
 
-        albumArt = (ImageView) rootView.findViewById(R.id.album_art);
-        artistArt = (ImageView) rootView.findViewById(R.id.artist_art);
-        albumTitle = (TextView) rootView.findViewById(R.id.album_title);
-        albumDetails = (TextView) rootView.findViewById(R.id.album_details);
-
-        toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
-
-        fab = (FloatingActionButton) rootView.findViewById(R.id.fab);
-
-        recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerview);
-        collapsingToolbarLayout = (CollapsingToolbarLayout) rootView.findViewById(R.id.collapsing_toolbar);
-        appBarLayout = (AppBarLayout) rootView.findViewById(R.id.app_bar);
-        recyclerView.setEnabled(false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        binding.recyclerview.setEnabled(false);
+        binding.recyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
 
         album = AlbumLoader.getAlbum(getActivity(), albumID);
 
@@ -126,35 +104,31 @@ public class AlbumDetailFragment extends Fragment {
             setUpEverything();
         }
 
-        fab.setOnClickListener(new View.OnClickListener() {
+        binding.fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Handler handler=new Handler();
+                Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        AlbumSongsAdapter adapter=(AlbumSongsAdapter)recyclerView.getAdapter();
-                        MusicPlayer.playAll(getActivity(), adapter.getSongIds(), 0,albumID , TimberUtils.IdType.Album, true);
-                        NavigationUtils.navigateToNowplaying(getActivity(),false);
+                        AlbumSongsAdapter adapter = (AlbumSongsAdapter) binding.recyclerview.getAdapter();
+                        MusicPlayer.playAll(getActivity(), adapter.getSongIds(), 0, albumID, TimberUtils.IdType.Album, true);
+                        NavigationUtils.navigateToNowplaying(getActivity(), false);
                     }
-                },150);
+                }, 150);
             }
         });
 
-        return rootView;
+        return binding.getRoot();
     }
 
     private void setupToolbar() {
-
-        ((AppCompatActivity) getActivity()).setSupportActionBar(toolbar);
-        final ActionBar ab = ((AppCompatActivity) getActivity()).getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-        collapsingToolbarLayout.setTitle(album.title);
-
+        ((AppCompatActivity) getActivity()).setSupportActionBar(binding.toolbar);
+        ((AppCompatActivity) getActivity()).getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
 
     private void setAlbumart() {
-        ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(albumID).toString(), albumArt,
+        ImageLoader.getInstance().displayImage(TimberUtils.getAlbumArtUri(albumID).toString(), binding.albumArt,
                 new DisplayImageOptions.Builder().cacheInMemory(true)
                         .showImageOnFail(R.drawable.ic_empty_music2)
                         .resetViewBeforeLoading(true)
@@ -165,16 +139,16 @@ public class AlbumDetailFragment extends Fragment {
 
                     @Override
                     public void onLoadingFailed(String imageUri, View view, FailReason failReason) {
-                         loadFailed=true;
-                        if (TimberUtils.isLollipop()&& PreferencesUtility.getInstance(getActivity()).getAnimations() )
-                            scheduleStartPostponedTransition(albumArt);
+                        loadFailed = true;
+                        if (TimberUtils.isLollipop() && PreferencesUtility.getInstance(getActivity()).getAnimations())
+                            scheduleStartPostponedTransition(binding.albumArt);
 
 
-                            if (isDarkTheme){
-                                MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
-                                        .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE)
-                                        .setColor(Color.BLACK);
-                                fab.setImageDrawable(builder.build());
+                        if (isDarkTheme) {
+                            MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
+                                    .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE)
+                                    .setColor(Color.BLACK);
+                            binding.fab.setImageDrawable(builder.build());
 
                         }
                     }
@@ -182,8 +156,8 @@ public class AlbumDetailFragment extends Fragment {
                     @Override
                     public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
                         Palette palette = Palette.generate(loadedImage);
-                        collapsingToolbarLayout.setContentScrimColor(palette.getVibrantColor(Color.parseColor("#66000000")));
-                        collapsingToolbarLayout.setStatusBarScrimColor(palette.getDarkVibrantColor(Color.parseColor("#66000000")));
+                        binding.collapsingToolbar.setContentScrimColor(palette.getVibrantColor(Color.parseColor("#66000000")));
+                        binding.collapsingToolbar.setStatusBarScrimColor(palette.getDarkVibrantColor(Color.parseColor("#66000000")));
 
                         ColorStateList fabColorStateList = new ColorStateList(
                                 new int[][]{
@@ -194,9 +168,9 @@ public class AlbumDetailFragment extends Fragment {
                                 }
                         );
 
-                        fab.setBackgroundTintList(fabColorStateList);
+                        binding.fab.setBackgroundTintList(fabColorStateList);
                         if (TimberUtils.isLollipop() && PreferencesUtility.getInstance(getActivity()).getAnimations())
-                            scheduleStartPostponedTransition(albumArt);
+                            scheduleStartPostponedTransition(binding.albumArt);
                     }
 
                     @Override
@@ -206,47 +180,35 @@ public class AlbumDetailFragment extends Fragment {
                 });
     }
 
-    private void setAlbumDetails() {
-
-        String songCount = TimberUtils.makeLabel(getActivity(), R.plurals.Nsongs, album.songCount);
-
-        String year = (album.year != 0) ? (" - " + String.valueOf(album.year)) : "";
-
-        albumTitle.setText(album.title);
-        albumDetails.setText(album.artistName + " - " + songCount + year);
-
-
-    }
 
     private void setUpAlbumSongs() {
-
         List<Song> songList = AlbumSongLoader.getSongsForAlbum(getActivity(), albumID);
         mAdapter = new AlbumSongsAdapter(getActivity(), songList, albumID);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
-        recyclerView.setAdapter(mAdapter);
+        binding.recyclerview.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
+        binding.recyclerview.setAdapter(mAdapter);
 
     }
 
     private void setUpEverything() {
         setupToolbar();
-        setAlbumDetails();
+        binding.setAlbum(album);
         setUpAlbumSongs();
-        FabAnimationUtils.scaleIn(fab);
+        FabAnimationUtils.scaleIn(binding.fab);
         MaterialDrawableBuilder builder = MaterialDrawableBuilder.with(getActivity())
                 .setIcon(MaterialDrawableBuilder.IconValue.SHUFFLE);
-        if( (loadFailed && isDarkTheme) )
+        if ((loadFailed && isDarkTheme))
             builder.setColor(Color.BLACK);
         else builder.setColor(Color.WHITE);
-        fab.setImageDrawable(builder.build());
+        binding.fab.setImageDrawable(builder.build());
         enableViews();
     }
 
-    private void enableViews(){
-        recyclerView.setEnabled(true);
+    private void enableViews() {
+        binding.recyclerview.setEnabled(true);
     }
 
-    private void disableView(){
-        recyclerView.setEnabled(false);
+    private void disableView() {
+        binding.recyclerview.setEnabled(false);
     }
 
     private void initActivityTransitions() {
@@ -281,7 +243,7 @@ public class AlbumDetailFragment extends Fragment {
         }
 
         public void onTransitionStart(Transition paramTransition) {
-            FabAnimationUtils.scaleOut(fab, 50, null);
+            FabAnimationUtils.scaleOut(binding.fab, 50, null);
             disableView();
         }
 
@@ -294,7 +256,7 @@ public class AlbumDetailFragment extends Fragment {
         }
 
         public void onTransitionStart(Transition paramTransition) {
-            FabAnimationUtils.scaleOut(fab, 50, null);
+            FabAnimationUtils.scaleOut(binding.fab, 50, null);
             disableView();
         }
 
