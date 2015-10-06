@@ -1,5 +1,6 @@
 package com.naman14.timber.fragments;
 
+import android.databinding.DataBindingUtil;
 import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,8 +13,12 @@ import android.view.ViewGroup;
 
 import com.naman14.timber.R;
 import com.naman14.timber.adapters.AlbumAdapter;
+import com.naman14.timber.databinding.FragmentRecyclerviewBinding;
 import com.naman14.timber.dataloaders.AlbumLoader;
+import com.naman14.timber.models.Album;
 import com.naman14.timber.widgets.FastScroller;
+
+import java.util.List;
 
 /**
  * Created by naman on 07/07/15.
@@ -21,21 +26,15 @@ import com.naman14.timber.widgets.FastScroller;
 public class AlbumFragment extends Fragment {
 
     private AlbumAdapter mAdapter;
-    private RecyclerView recyclerView;
+    private FragmentRecyclerviewBinding binding;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView =  inflater.inflate(
-                R.layout.fragment_recyclerview, container, false);
-
-        recyclerView=(RecyclerView) rootView.findViewById(R.id.recyclerview);
-        recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
-
-        FastScroller fastScroller=(FastScroller) rootView.findViewById(R.id.fastscroller);
-        fastScroller.setVisibility(View.GONE);
-
-        new loadAlbums().execute("");
-        return rootView;
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_recyclerview, container, false);
+        binding.recyclerview.setLayoutManager(new GridLayoutManager(getActivity(), 2));
+        binding.fastscroller.setVisibility(View.GONE);
+        new LoadAlbums().execute();
+        return binding.getRoot();
     }
 
     public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
@@ -46,39 +45,29 @@ public class AlbumFragment extends Fragment {
         }
 
         @Override
-        public void getItemOffsets(Rect outRect, View view,
-                                   RecyclerView parent, RecyclerView.State state) {
-
-
+        public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
             outRect.left = space;
-            outRect.top=space;
-            outRect.right=space;
-            outRect.bottom=space;
-
+            outRect.top = space;
+            outRect.right = space;
+            outRect.bottom = space;
         }
     }
 
-    private class loadAlbums extends AsyncTask<String, Void, String> {
+    private class LoadAlbums extends AsyncTask<Void, Void, List<Album>> {
 
         @Override
-        protected String doInBackground(String... params) {
-            mAdapter = new AlbumAdapter(getActivity(), AlbumLoader.getAllAlbums(getActivity()));
-            return "Executed";
+        protected List<Album> doInBackground(Void... params) {
+            return AlbumLoader.getAllAlbums(getActivity());
         }
 
         @Override
-        protected void onPostExecute(String result) {
-            recyclerView.setAdapter(mAdapter);
-            //to add spacing between cards
-            if (getActivity() != null) {
+        protected void onPostExecute(List<Album> albums) {
+            if (getActivity() != null && !isDetached() && albums != null) {
+                binding.recyclerview.setAdapter(new AlbumAdapter(getActivity(), albums));
                 int spacingInPixels = getActivity().getResources().getDimensionPixelSize(R.dimen.spacing_card_album_grid);
-                recyclerView.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
+                binding.recyclerview.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
             }
-
         }
-
-        @Override
-        protected void onPreExecute() {}
     }
 
 

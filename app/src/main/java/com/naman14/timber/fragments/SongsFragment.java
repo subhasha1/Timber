@@ -12,20 +12,23 @@ import android.view.ViewGroup;
 
 import com.naman14.timber.R;
 import com.naman14.timber.activities.BaseActivity;
+import com.naman14.timber.adapters.AlbumAdapter;
 import com.naman14.timber.adapters.SongsListAdapter;
 import com.naman14.timber.databinding.FragmentMainBinding;
 import com.naman14.timber.databinding.FragmentRecyclerviewBinding;
 import com.naman14.timber.dataloaders.SongLoader;
 import com.naman14.timber.listeners.MusicStateListener;
+import com.naman14.timber.models.Song;
 import com.naman14.timber.widgets.DividerItemDecoration;
 import com.naman14.timber.widgets.FastScroller;
+
+import java.util.List;
 
 /**
  * Created by naman on 12/06/15.
  */
 public class SongsFragment extends Fragment implements MusicStateListener {
 
-    private SongsListAdapter mAdapter;
     private FragmentRecyclerviewBinding binding;
 
     @Override
@@ -47,22 +50,21 @@ public class SongsFragment extends Fragment implements MusicStateListener {
     }
 
     public void onMetaChanged() {
-        if (mAdapter != null)
-            mAdapter.notifyDataSetChanged();
+        if (binding.recyclerview.getAdapter() != null)
+            binding.recyclerview.getAdapter().notifyDataSetChanged();
     }
 
-    private class LoadSongs extends AsyncTask<Void, Void, Void> {
+    private class LoadSongs extends AsyncTask<Void, Void, List<Song>> {
 
         @Override
-        protected Void doInBackground(Void... params) {
-            mAdapter = new SongsListAdapter(getActivity(), SongLoader.getAllSongs(getActivity()), false);
-            return null;
+        protected List<Song> doInBackground(Void... params) {
+            return SongLoader.getAllSongs(getActivity());
         }
 
         @Override
-        protected void onPostExecute(Void result) {
-            if (getActivity() != null) {
-                binding.recyclerview.setAdapter(mAdapter);
+        protected void onPostExecute(List<Song> songs) {
+            if (getActivity() != null && !isDetached() && songs != null) {
+                binding.recyclerview.setAdapter(new SongsListAdapter(getActivity(), songs, false));
                 binding.recyclerview.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL_LIST));
             }
         }

@@ -191,28 +191,5 @@ public class TimberUtils {
         return 0;
     }
 
-    @BindingAdapter({"bind:albumArt", "bind:bitmapDisplayer"})
-    public static void displayAlbumArt(ImageView view, long artId, int displayerDelay) {
-        displayAlbumArt(view, TimberUtils.getAlbumArtUri(artId).toString(), displayerDelay);
-    }
-
-    @BindingAdapter({"bind:albumArt", "bind:bitmapDisplayer"})
-    public static void displayAlbumArt(ImageView view, String url, int displayerDelay) {
-        DisplayImageOptions.Builder builder = new DisplayImageOptions.Builder()
-                .cacheOnDisk(true)
-                .cacheInMemory(true)
-                .showImageOnFail(R.drawable.ic_empty_music2)
-                .resetViewBeforeLoading(true);
-        if (displayerDelay > 0) {
-            builder.displayer(new FadeInBitmapDisplayer(displayerDelay));
-        }
-        ImageLoader.getInstance().displayImage(url, view, builder.build());
-    }
-
-    @BindingAdapter("bind:albumArt")
-    public static void displayAlbumArt(ImageView view, long artId) {
-        displayAlbumArt(view, artId, 0);
-    }
-
 
 }
