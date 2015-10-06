@@ -104,7 +104,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ItemHolder
                 });
                 break;
             case 10:
-                itemHolder.binding.setVariable(BR.header, (String) searchResults.get(i));
+                itemHolder.binding.setVariable(BR.header, searchResults.get(i));
             case 3:
                 break;
         }

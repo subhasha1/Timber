@@ -14,8 +14,6 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer;
 /**
  * Created by subhashacharya on 10/6/15.
  */
-@BindingMethods({
-        @BindingMethod(type = RecyclerView.class, attribute = "app:itemDecoration", method = "addItemDecoration")})
 public class TimberBindingUtils {
     @BindingAdapter({"bind:albumArt", "bind:bitmapDisplayer"})
     public static void displayAlbumArt(ImageView view, long artId, int displayerDelay) {
@@ -38,5 +36,11 @@ public class TimberBindingUtils {
     @BindingAdapter("bind:albumArt")
     public static void displayAlbumArt(ImageView view, long artId) {
         displayAlbumArt(view, artId, 0);
+    }
+
+    @BindingAdapter("bind:itemDecoration")
+    public static void setItemDecoration(RecyclerView view, RecyclerView.ItemDecoration decoration) {
+        if (decoration != null)
+            view.addItemDecoration(decoration);
     }
 }
